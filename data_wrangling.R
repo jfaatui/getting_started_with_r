@@ -45,8 +45,11 @@ filter(breed_traits, drooling_level %in% c(1,3,5))
 
 filter(breed_traits, drooling_level %in% c(3,4,5) & coat_length == "Short")
 
+<<<<<<< HEAD
 # Not operator
 filter(breed_traits, drooling_level != 5)
 filter(breed_traits, !drooling_level %in% c(1, 3, 5)) # NOT IN 1, 3 or 5
 
+=======
+>>>>>>> 9e0b2d209813ad83ec9f542e84daa4a736de7109
 filter(breed_traits, affectionate_with_family %in% c(4,5) & good_with_young_children %in% c(4,5) & good_with_other_dogs %in% c(4,5))
