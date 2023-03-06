@@ -51,3 +51,18 @@ filter(breed_traits, !drooling_level %in% c(1, 3, 5)) # NOT IN 1, 3 or 5
 
 #Homework
 filter(breed_traits, affectionate_with_family %in% c(4,5) & good_with_young_children %in% c(4,5) & good_with_other_dogs %in% c(4,5))
+
+
+# Native pipes (keyboard shortcut Ctrl + Shift + M)
+
+# See ALL KEYBOARD SHORTCUTS (Alt + Shift + K)
+
+# Arrange
+arrange(breed_traits, breed)
+arrange(breed_traits, desc(breed))
+arrange(breed_traits, desc(breed), affectionate_with_family)
+
+# Native Piping - filter then arrange via the pipe
+breed_traits |> 
+  filter(drooling_level == 5) |> 
+  arrange(breed)
