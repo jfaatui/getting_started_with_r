@@ -92,3 +92,14 @@ trainable_dods <- breed_traits |>
 smmoth_dogs <- breed_traits |> 
   mutate(smooth_coat = if_else(coat_type == "smooth", TRUE, FALSE)) |> 
   select(breed, coat_type, smooth_coat)
+
+# Homework
+dogs_that_drool <- breed_traits |> 
+  mutate(drool_heaviness = case_when(
+    drooling_level < 3 ~ "Light drool",
+    drooling_level == 3 ~ "Medium drool",
+    drooling_level > 3 ~ "Heavy drool",
+  )) |> 
+  select(breed, drooling_level, drool_heaviness) |> 
+  filter(!drool_heaviness %in% c("Light drool", "Heavy drool")) |> 
+  arrange(desc(breed))
