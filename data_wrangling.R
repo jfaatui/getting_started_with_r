@@ -78,7 +78,7 @@ noisy_dogs <- breed_traits |>
   select(breed, energy_level, barking_level, bark_energy_level) |> 
   arrange(desc(bark_energy_level))
 
-# Case_when when you have more than 2 conditions
+# Case_when - use when you have more than 2 conditions
 trainable_dods <- breed_traits |> 
   mutate(trainability_category = case_when(
     trainability_level <= 2 ~ "Not very trainable",
@@ -88,7 +88,7 @@ trainable_dods <- breed_traits |>
   select(breed, trainability_level, trainability_category) |> 
   filter(trainability_category == "Very trainable")
 
-# if_else when you have 2 conditions
+# if_else - use when you have 2 conditions
 smmoth_dogs <- breed_traits |> 
   mutate(smooth_coat = if_else(coat_type == "smooth", TRUE, FALSE)) |> 
   select(breed, coat_type, smooth_coat)
@@ -103,3 +103,25 @@ dogs_that_drool <- breed_traits |>
   select(breed, drooling_level, drool_heaviness) |> 
   filter(!drool_heaviness %in% c("Light drool", "Heavy drool")) |> 
   arrange(desc(breed))
+
+# Group by and Summarise
+breed_traits |> 
+  mutate(trainability_category = case_when(
+    trainability_level <= 2 ~ "Not very trainable",
+    trainability_level == 3 ~ "Somewhat trainable",
+    trainability_level > 3 ~ "Very trainable",
+  )) |> 
+  group_by(trainability_category) |> 
+  summarise(
+    avg_energy_lvl = mean(energy_level),
+    count = n() # counts rows
+    )
+
+# Get a simple count of rows for each category
+breed_traits |> 
+  mutate(trainability_category = case_when(
+    trainability_level <= 2 ~ "Not very trainable",
+    trainability_level == 3 ~ "Somewhat trainable",
+    trainability_level > 3 ~ "Very trainable",
+  )) |> 
+  count(trainability_category)
