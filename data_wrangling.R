@@ -55,6 +55,7 @@ filter(breed_traits, affectionate_with_family %in% c(4,5) & good_with_young_chil
 
 # Native pipes (keyboard shortcut Ctrl + Shift + M)
 
+# "Assign" keyboard shortcut Alt + -
 # See ALL KEYBOARD SHORTCUTS (Alt + Shift + K)
 
 # Arrange
@@ -63,6 +64,31 @@ arrange(breed_traits, desc(breed))
 arrange(breed_traits, desc(breed), affectionate_with_family)
 
 # Native Piping - filter then arrange via the pipe
-breed_traits |> 
+drooly_dogs <- breed_traits |> 
   filter(drooling_level == 5) |> 
   arrange(breed)
+
+# Mutate
+View(breed_traits)
+
+# breed_traits |> mutate(.date$"Bark Energy Level")  # if I didn't have cleaned-up names, I'd have to call the column by using this notation
+
+noisy_dogs <- breed_traits |> 
+  mutate(bark_energy_level = energy_level * barking_level) |> 
+  select(breed, energy_level, barking_level, bark_energy_level) |> 
+  arrange(desc(bark_energy_level))
+
+# Case_when when you have more than 2 conditions
+trainable_dods <- breed_traits |> 
+  mutate(trainability_category = case_when(
+    trainability_level <= 2 ~ "Not very trainable",
+    trainability_level == 3 ~ "Somewhat trainable",
+    trainability_level > 3 ~ "Very trainable",
+  )) |> 
+  select(breed, trainability_level, trainability_category) |> 
+  filter(trainability_category == "Very trainable")
+
+# if_else when you have 2 conditions
+smmoth_dogs <- breed_traits |> 
+  mutate(smooth_coat = if_else(coat_type == "smooth", TRUE, FALSE)) |> 
+  select(breed, coat_type, smooth_coat)
