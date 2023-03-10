@@ -125,3 +125,24 @@ breed_traits |>
     trainability_level > 3 ~ "Very trainable",
   )) |> 
   count(trainability_category)
+
+#Homework
+# Which coat type has the highest average (mean) coat grooming frequency?
+breed_traits |> 
+  group_by(coat_type) |> 
+  summarise(
+    avg_coat_grm_freq = mean(coat_grooming_frequency),
+    count = n()) |> 
+  arrange(desc(avg_coat_grm_freq))
+
+# Create a table of the dogs with the coat type identified above. Do they all have similarly
+# high coat-grooming frequency scores?
+breed_traits |> 
+  filter(coat_type == "Corded") |> 
+  select(breed, coat_type, coat_grooming_frequency)
+
+# Which is the most common coat type?
+breed_traits |> 
+  group_by(coat_type) |> 
+  summarise(count = n()) |> 
+  arrange(desc(count))
