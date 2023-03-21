@@ -7,6 +7,7 @@ install.packages("janitor")
 
 library(dplyr)
 library(janitor)
+library(ggplot2)
 
 tuesdata <- tidytuesdayR::tt_load("2022-02-01")
 
@@ -146,3 +147,81 @@ breed_traits |>
   group_by(coat_type) |> 
   summarise(count = n()) |> 
   arrange(desc(count))
+
+#Binding Rows and Joining tables
+# Starting again with the 3 files
+# Save all 3 files as a list and create an RDS file
+tuesdata <- tidytuesdayR::tt_load("2022-02-01") |> 
+  saveRDS("all_good_dogs.rds")
+
+all_dogs <- readRDS("all_good_dogs.rds")
+
+# Piping the breed_traits table into clean names to standardise the names of the columns
+# Wrapping in parenthesis lets you see the output in the console AND creates the breed_traits object in the Environment tab
+(breed_traits <-  all_dogs$breed_traits |> 
+    clean_names())
+
+(breed_ranks <-  all_dogs$breed_rank |> 
+    clean_names())
+
+# Left join
+(traits_with_ranks <- left_join(breed_traits, breed_ranks, by = "breed"))
+
+# Some names don't match because of spaces between breed names, so create a new additional
+# column called key which you populate with the breed names in a clean format
+(breed_traits <- all_dogs$breed_traits |> 
+    clean_names() |> 
+    mutate(key = make_clean_names(breed)))
+
+# Same with the other table:create a new additional column called key which you populate with the breed names in a clean format
+# There's a minus breed command to take away this second breed column which is exactly the same field as in
+# the other table, as we don't need two breed columns when joining the tables together
+(breed_ranks <- all_dogs$breed_rank |> 
+    clean_names() |> 
+    mutate(key = make_clean_names(breed)) |> 
+    select(-breed))
+
+#Join the tables together on the respective "key" columns
+(traits_with_ranks <- left_join(breed_traits, breed_ranks, by = "key"))
+
+# Check join was successful by checking "links" column where every row should NOT be null
+# so check to see that there are NO null rows in "links" column
+# Expecting count = 0 if everything matches
+(traits_with_ranks |> 
+    filter(is.na(links)) |> 
+    nrow())
+
+# BUT can check BEFORE you join tables by using ANTI_JOIN
+# So below, I'm asking IF I want to join the two tables by their "key" columns, give me
+# a count of anything in breed_traits that can't be found in breed_ranks
+# Expecting count = 0 if everything matches
+(anti_join(breed_traits, breed_ranks, by = "key") |> 
+    nrow())
+
+# Want weighted score where it's positive traits minus negative traits to get an overall score for dog
+# This requires taking away negative_traits_score twice
+# Because when creating all_traits_score, it summed EVERY single column, including the ones to be used in negative_traits_score
+# So negative_traits_score is minused once, to remove the scores of the negative traits so that you have the scores of the traits you want to keep in a modified all_traits_score total
+# Then negative traits_score is taken away a second time from this modified all_traits_score total, to actually have a "minus effect" on the modified all_traits_score total
+(breed_traits <- all_dogs$breed_traits |> 
+    clean_names() |> 
+    mutate(
+      key = make_clean_names(breed),
+      all_traits_score = rowSums(across(where(is.double)), na.rm = TRUE),
+      negative_traits_score = rowSums(across(c(shedding_level:drooling_level, barking_level)), na.rm = TRUE),
+      weighted_score = all_traits_score - (2 * negative_traits_score)
+    ))
+
+#Want average rank from breed_rank table as you get one for each year for a dog
+(breed_ranks <- all_dogs$breed_rank |> 
+    clean_names() |> 
+    mutate(
+      key = make_clean_names(breed),
+      avg_rank = rowMeans(across(where(is.double)), na.rm = TRUE) |> round()
+      ) |> 
+        select(-breed))
+
+# Join tables again now that one table has a new, added weighted_score column, the other table has a new, added avg_rank column
+(traits_with_ranks |> left_join(breed_traits, breed_ranks, by = "key"))
+
+  
